@@ -319,7 +319,7 @@ const movieRating = watched.find(i => i.imdbID === selectedId)?.userRating
     setIsLoading2(true)
     async function fetchSelectedMovie() {
       const res = await fetch(
-        `http://www.omdbapi.com/?apikey=e7a4bb48&i=${selectedId}`
+        `https://www.omdbapi.com/?apikey=e7a4bb48&i=${selectedId}`
       );
       const fetchedMovieData = await res.json()
       setMovieData(fetchedMovieData)
