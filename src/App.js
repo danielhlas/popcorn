@@ -1,4 +1,3 @@
-import { setSelectionRange } from "@testing-library/user-event/dist/utils";
 import {useEffect, useState } from "react";
 
 const average = (arr) =>
