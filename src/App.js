@@ -51,7 +51,7 @@ useEffect(
         setError("")
         
         const res = await fetch(
-          `http://www.omdbapi.com/?i=tt3896198&apikey=e7a4bb48&s=${query}`, 
+          `https://www.omdbapi.com/?i=tt3896198&apikey=e7a4bb48&s=${query}`, 
           {signal: controller.signal}
         );
 
