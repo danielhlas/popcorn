@@ -4,16 +4,20 @@ import {useEffect, useState } from "react";
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-
+//////////////////////////////////////////////
 /////////////////   APP   ////////////////////
+//////////////////////////////////////////////
 export default function App() {
-  
-  const [query, setQuery] = useState("Lord");//vyhledávaný film
+  const [query, setQuery] = useState("Lord"); //vyhledávaný film
 
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(function() { //při initial render čteme data z prohlížeče
+    const storedValue = localStorage.getItem("watched");
+    if (storedValue === null) return []; //early return
+    return JSON.parse(storedValue);
+  })
 
-  const [searching, setSearching] = useState("")
+  // const [searching, setSearching] = useState("")
   const [selectedId, setSelectedId] = useState(null)
   
   const [isOpen1, setIsOpen1] = useState(true);
@@ -22,7 +26,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("") 
 
-  function addMovie(MovieData, rating){//zvolený film přidá do seznamu watched
+  function addMovie(MovieData, rating){ //zvolený film přidá do seznamu watched
     const newMovie = {
       imdbID: MovieData.imdbID,
       Title: MovieData.Title,
@@ -85,7 +89,9 @@ useEffect(
 }, [query]);
 
   
-
+useEffect(function() { //Ukládá data do prohlížeče
+	localStorage.setItem("watched", JSON.stringify(watched))
+}, [watched])
 
   return (
   <>
@@ -99,6 +105,9 @@ useEffect(
       </Box>
 
       <Box isOpen={isOpen2} setIsOpen={setIsOpen2}>
+
+      <WatchedSummary watched={watched}/>
+
         {selectedId ? 
         <SelectedMovie 
           selectedId={selectedId} 
@@ -114,14 +123,16 @@ useEffect(
 }
 
 
+//////////////////////////////////////////////
 /////////////////   NAV   ////////////////////
+//////////////////////////////////////////////
 function Nav({movies, query, setQuery}) {
   
     return(
     <nav className="nav-bar">
       <div className="logo">
         <span role="img">🍿</span>
-        <h1>usePopcorn</h1>
+        <h1>Popcorn</h1>
       </div>
 
       <input
@@ -141,7 +152,9 @@ function Nav({movies, query, setQuery}) {
 
 
 
-/////////////////SearchedMovies COMPONENT////////////////////
+//////////////////////////////////////////////
+//////////////   SearchedMovies   ////////////
+//////////////////////////////////////////////
 function SearchedMovies({movies, setSelectedId}){
 
   return(
@@ -163,14 +176,18 @@ function SearchedMovies({movies, setSelectedId}){
 }
 
 
+//////////////////////////////////////////////
+//////////////   Error Messages   ////////////
+//////////////////////////////////////////////
 function ErrorMessage({message}) {
   return (
-    <p className="error"> {message}</p>
+    <p className="error"> {message} </p>
   )
-
 }
 
-/////////////////WatchedMovies COMPONENT////////////////////
+//////////////////////////////////////////////
+//////////////   WatchedMovies   ////////////
+//////////////////////////////////////////////
 function WatchedMovies({ watched, deleteMovie }) {
 
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
@@ -204,7 +221,9 @@ function WatchedMovies({ watched, deleteMovie }) {
 }
 
 
-
+//////////////////////////////////////////////
+//////////////////   Box   ///////////////////
+//////////////////////////////////////////////
 function Box({ isOpen=true, setIsOpen, children }){
   return(
     <div className="box">
@@ -222,7 +241,9 @@ function Box({ isOpen=true, setIsOpen, children }){
 }
 
 
-
+//////////////////////////////////////////////
+/////////////////   Rating   /////////////////
+//////////////////////////////////////////////
 function Rating({rating, setRating}) {
   const [hoverRating, setHoverRating] = useState(0)
 
@@ -244,7 +265,9 @@ function Rating({rating, setRating}) {
 
 }
 
-
+//////////////////////////////////////////////
+/////////////////    Star    /////////////////
+//////////////////////////////////////////////
 function Star({onRate, full, onHoverIn, onHoverOut}){
   return(
   <span onMouseEnter={(onHoverIn)} onMouseLeave={(onHoverOut)} role="button" onClick={onRate} className="starStyle">
@@ -275,6 +298,10 @@ function Star({onRate, full, onHoverIn, onHoverOut}){
 </span>)
 }
 
+
+//////////////////////////////////////////////
+///////////////    Loader    /////////////////
+//////////////////////////////////////////////
 function Loader(){
   return(<div className="box">
     <p className="loader">Loading data... ↻</p>
@@ -282,11 +309,14 @@ function Loader(){
 }
 
 
+
+//////////////////////////////////////////////
+////////////    SelectedMovie    /////////////
+//////////////////////////////////////////////
 function SelectedMovie({selectedId, setSelectedId, addMovie, watched}){
 const [MovieData, setMovieData] = useState([])
 const [isLoading2, setIsLoading2] = useState(false)
 const [rating, setRating] = useState(0)
-
 
 const arrayWatchedId = watched.map((i) => i.imdbID)
 const wasWatched = arrayWatchedId.includes(selectedId)
@@ -356,4 +386,34 @@ useEffect(
   </div>
   )
 
+}
+
+
+
+//////////////////////////////////////////////
+///////////////    Summary    ////////////////
+//////////////////////////////////////////////
+function WatchedSummary({ watched }) {
+  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
+  const avgUserRating = average(watched.map((movie) => movie.userRating));
+
+  return (
+    <div className="summary">
+      <h2>Movies you watched</h2>
+      <div>
+        <p>
+          <span>#️⃣</span>
+          <span>{watched.length} movies</span>
+        </p>
+        <p>
+          <span>⭐️</span>
+          <span>{avgImdbRating.toFixed(1)}</span>
+        </p>
+        <p>
+          <span>🌟</span>
+          <span>{avgUserRating.toFixed(1)}</span>
+        </p>
+      </div>
+    </div>
+  );
 }
